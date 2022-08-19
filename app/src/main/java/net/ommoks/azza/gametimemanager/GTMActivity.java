@@ -1,7 +1,6 @@
 package net.ommoks.azza.gametimemanager;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,26 +12,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.room.Room;
 
-import net.ommoks.azza.gametimemanager.database.AppDatabase;
-import net.ommoks.azza.gametimemanager.database.Record;
-import net.ommoks.azza.gametimemanager.database.RecordDao;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import net.ommoks.azza.gametimemanager.database.User;
-import net.ommoks.azza.gametimemanager.database.UserDao;
 import net.ommoks.azza.gametimemanager.databinding.ActivityGtmBinding;
 import net.ommoks.azza.gametimemanager.ui.AddChildDialog;
 import net.ommoks.azza.gametimemanager.ui.DataViewModel;
 import net.ommoks.azza.gametimemanager.ui.UserListAdapter;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class GTMActivity extends AppCompatActivity implements AddChildDialog.Listener {
+public class GTMActivity extends AppCompatActivity
+        implements AddChildDialog.Listener, UserListAdapter.ItemListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "GTMActivity";
 
     final private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
     private ActivityGtmBinding mBinding;
@@ -40,8 +36,6 @@ public class GTMActivity extends AppCompatActivity implements AddChildDialog.Lis
     private DataViewModel mDataViewModel;
     private UserListAdapter mAdapter;
 
-    private RecordDao mRecordDao;
-    private UserDao mUserDao;
     private int mWeekIndex = 0;
 
     @Override
@@ -52,37 +46,8 @@ public class GTMActivity extends AppCompatActivity implements AddChildDialog.Lis
         mBinding.userList.setLayoutManager(new LinearLayoutManager(this));
         mBinding.userList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        AppDatabase recordsDb = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "records").build();
-        mRecordDao = recordsDb.recordDao();
-        AppDatabase usersDb = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "users").build();
-        mUserDao = usersDb.userDao();
-
         mDataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
         applyViewModel();
-        asyncInit();
-    }
-
-    private void asyncInit() {
-        mExecutorService.submit(() -> {
-            // Add child list
-            List<User> childList = mUserDao.getAll();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                childList.sort(Comparator.comparingInt(u -> u.id));
-            }
-            for (User child : childList) {
-                mDataViewModel.addChild(child.name);
-            }
-
-            // Read record data from DB
-            Record lastOne = mRecordDao.getLastOne();
-            if (lastOne != null) {
-                mWeekIndex = lastOne.weekIndex;
-            } else {
-                Log.e(TAG, "getLastOne() returned null");
-            }
-            Log.d(TAG, "current week index = " + mWeekIndex);
-
-        });
     }
 
     @Override
@@ -109,22 +74,35 @@ public class GTMActivity extends AppCompatActivity implements AddChildDialog.Lis
         mExecutorService.shutdown();
     }
 
-    private void insertRecord(final Record record) {
-        mExecutorService.submit(() -> mRecordDao.insert(record));
-    }
-
     @Override
     public void onChildAdded(String name) {
-        mExecutorService.submit(() -> {
-            mUserDao.insert(new User(name));
-            mDataViewModel.addChild(name);
-        });
+        mExecutorService.submit(() -> mDataViewModel.addUser(new User(name)));
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void applyViewModel() {
-        mAdapter = new UserListAdapter(mDataViewModel.childList.getValue());
+        mDataViewModel.weekIndex.observe(this, integer -> {
+            mWeekIndex = integer;
+            Log.d(TAG, "Week Index = " + integer);
+        });
+        mDataViewModel.fetchWeekIndex();
+
+        mAdapter = new UserListAdapter(new ArrayList<>(), this);
         mBinding.userList.setAdapter(mAdapter);
-        mDataViewModel.childList.observe(this, childList -> mAdapter.notifyDataSetChanged());
+        mDataViewModel.userList.observe(this, childList -> {
+            mAdapter.changeDataSet(childList);
+        });
+    }
+
+    // UserListAdapter.ItemListener
+    @Override
+    public void onUserLongClicked(User user) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.do_you_delete_this)
+                .setNegativeButton(android.R.string.no,
+                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .setPositiveButton(android.R.string.yes,
+                        (dialogInterface, i) -> mDataViewModel.deleteUser(user))
+                .show();
     }
 }

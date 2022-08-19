@@ -1,6 +1,7 @@
 package net.ommoks.azza.gametimemanager.database;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -14,6 +15,6 @@ public interface UserDao {
     @Insert
     void insert(User user);
 
-    @Insert
+    @Delete
     void delete(User user);
 }

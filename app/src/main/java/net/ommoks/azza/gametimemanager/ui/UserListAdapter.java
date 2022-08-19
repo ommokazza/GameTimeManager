@@ -1,5 +1,6 @@
 package net.ommoks.azza.gametimemanager.ui;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,19 +13,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.textview.MaterialTextView;
 
 import net.ommoks.azza.gametimemanager.R;
-import net.ommoks.azza.gametimemanager.databinding.UserListItemBinding;
+import net.ommoks.azza.gametimemanager.database.User;
 
 import java.util.ArrayList;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
-    private final ArrayList<String> mUserList;
+    public interface ItemListener {
+        void onUserLongClicked(User user);
+    }
+
+    private ArrayList<User> mUserList;
+    private ItemListener mItemListener;
 
     private static final int TIME_UNIT = 15;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        private UserListItemBinding mBinding;
 
         final private MaterialTextView name;
         private AppCompatButton decrease;
@@ -32,10 +36,16 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         private AppCompatButton increase;
         private AppCompatButton done;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, final ItemListener listener) {
             super(view);
 
             name = view.findViewById(R.id.name);
+            name.setOnLongClickListener(nameTextView -> {
+                if (listener != null) {
+                    listener.onUserLongClicked((User) nameTextView.getTag());
+                }
+                return true;
+            });
             time = view.findViewById(R.id.minutes);
             decrease = view.findViewById(R.id.decrease);
             decrease.setOnClickListener(view1 -> calculateTime(-TIME_UNIT));
@@ -56,8 +66,14 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         }
     }
 
-    public UserListAdapter(ArrayList<String> mUserList) {
-        this.mUserList = mUserList;
+    public UserListAdapter(ArrayList<User> userList, ItemListener listener) {
+        mUserList = userList;
+        mItemListener = listener;
+    }
+
+    public void changeDataSet(ArrayList<User> userList) {
+        mUserList = userList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -65,12 +81,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.user_list_item, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, mItemListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder vh, int position) {
-        vh.name.setText(mUserList.get(position));
+        vh.name.setText(mUserList.get(position).name);
+        vh.name.setTag(mUserList.get(position));
     }
 
     @Override

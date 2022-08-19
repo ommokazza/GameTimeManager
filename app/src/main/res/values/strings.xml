@@ -6,4 +6,5 @@
     <string name="ok" tools:ignore="MissingTranslation">@android:string/ok</string>
     <string name="cancel" tools:ignore="MissingTranslation">@android:string/cancel</string>
     <string name="input_name">Input name</string>
+    <string name="do_you_delete_this">Do you delete this?</string>
 </resources>
