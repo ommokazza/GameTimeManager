@@ -1,9 +1,16 @@
 package net.ommoks.azza.gametimemanager;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.room.Room;
@@ -11,25 +18,30 @@ import androidx.room.Room;
 import net.ommoks.azza.gametimemanager.database.AppDatabase;
 import net.ommoks.azza.gametimemanager.database.Record;
 import net.ommoks.azza.gametimemanager.database.RecordDao;
+import net.ommoks.azza.gametimemanager.database.User;
+import net.ommoks.azza.gametimemanager.database.UserDao;
 import net.ommoks.azza.gametimemanager.databinding.ActivityGtmBinding;
+import net.ommoks.azza.gametimemanager.ui.AddChildDialog;
+import net.ommoks.azza.gametimemanager.ui.DataViewModel;
 import net.ommoks.azza.gametimemanager.ui.UserListAdapter;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class GTMActivity extends AppCompatActivity {
+public class GTMActivity extends AppCompatActivity implements AddChildDialog.Listener {
 
     private static final String TAG = "MainActivity";
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    final private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
     private ActivityGtmBinding mBinding;
 
+    private DataViewModel mDataViewModel;
+    private UserListAdapter mAdapter;
+
     private RecordDao mRecordDao;
+    private UserDao mUserDao;
     private int mWeekIndex = 0;
 
     @Override
@@ -37,16 +49,31 @@ public class GTMActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = ActivityGtmBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
-
+        mBinding.userList.setLayoutManager(new LinearLayoutManager(this));
         mBinding.userList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "records").build();
-        mRecordDao = db.recordDao();
+        AppDatabase recordsDb = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "records").build();
+        mRecordDao = recordsDb.recordDao();
+        AppDatabase usersDb = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "users").build();
+        mUserDao = usersDb.userDao();
+
+        mDataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
+        applyViewModel();
         asyncInit();
     }
 
     private void asyncInit() {
-        executorService.submit(() -> {
+        mExecutorService.submit(() -> {
+            // Add child list
+            List<User> childList = mUserDao.getAll();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                childList.sort(Comparator.comparingInt(u -> u.id));
+            }
+            for (User child : childList) {
+                mDataViewModel.addChild(child.name);
+            }
+
+            // Read record data from DB
             Record lastOne = mRecordDao.getLastOne();
             if (lastOne != null) {
                 mWeekIndex = lastOne.weekIndex;
@@ -55,53 +82,49 @@ public class GTMActivity extends AppCompatActivity {
             }
             Log.d(TAG, "current week index = " + mWeekIndex);
 
-            //TODO: Manage current week data
-            List<Record> currentWeekRecords = mRecordDao.getAllWithWeekIndex(mWeekIndex);
-
-            //Test [[
-            ArrayList<String> userList = new ArrayList<>();
-            userList.add("1.한결");
-            userList.add("2.소은");
-            userList.add("3.시원");
-            UserListAdapter adapter = new UserListAdapter(userList);
-            //Test ]]
-            mBinding.userList.setLayoutManager(new LinearLayoutManager(this));
-            mBinding.userList.setAdapter(adapter);
-
         });
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        //Test [[
-//        Record r = new Record();
-//        r.weekIndex = weekIndex;
-//        r.type = 1;
-//        r.timestamp = System.currentTimeMillis();
-//        r.useTime = 15;
-//        r.user = "한결";
-//        r.comment = "";
-//        insertRecord(r);
-//
-//        executorService.submit(new Runnable() {
-//            @Override
-//            public void run() {
-//                for (Record r : recordDao.getAll()) {
-//                    Log.d(TAG, r.toString());
-//                }
-//            }
-//        });
-        //Test]]
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.add_child) {
+            new AddChildDialog()
+                    .setListener(this)
+                    .show(getSupportFragmentManager(), "add_child");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executorService.shutdown();
+        mExecutorService.shutdown();
     }
 
     private void insertRecord(final Record record) {
-        executorService.submit(() -> mRecordDao.insert(record));
+        mExecutorService.submit(() -> mRecordDao.insert(record));
+    }
+
+    @Override
+    public void onChildAdded(String name) {
+        mExecutorService.submit(() -> {
+            mUserDao.insert(new User(name));
+            mDataViewModel.addChild(name);
+        });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void applyViewModel() {
+        mAdapter = new UserListAdapter(mDataViewModel.childList.getValue());
+        mBinding.userList.setAdapter(mAdapter);
+        mDataViewModel.childList.observe(this, childList -> mAdapter.notifyDataSetChanged());
     }
 }

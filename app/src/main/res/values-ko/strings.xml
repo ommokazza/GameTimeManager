@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">게임 시간 관리자</string>
+    <string name="add_child">아이 추가</string>
+    <string name="input_name">이름을 입력하세요</string>
+</resources>
