@@ -17,11 +17,11 @@ import java.util.ArrayList;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
-    private String[] userList;
+    final private ArrayList<String> mUserList;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private MaterialTextView name;
+        final private MaterialTextView name;
         private AppCompatButton remove;
         private AppCompatTextView time;
         private AppCompatButton add;
@@ -36,8 +36,8 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         }
     }
 
-    public UserListAdapter(ArrayList<String> userList) {
-        this.userList = userList.toArray(new String[0]);
+    public UserListAdapter(ArrayList<String> mUserList) {
+        this.mUserList = mUserList;
     }
 
     @NonNull
@@ -50,11 +50,11 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder vh, int position) {
-        vh.name.setText(userList[position]);
+        vh.name.setText(mUserList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return userList.length;
+        return mUserList.size();
     }
 }

@@ -1,5 +1,9 @@
-<resources>
-    <string name="app_name">GameTimeManager</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Game Time Manager</string>
 
     <string name="zero" translatable="false">0</string>
+    <string name="add_child">Add Child</string>
+    <string name="ok" tools:ignore="MissingTranslation">@android:string/ok</string>
+    <string name="cancel" tools:ignore="MissingTranslation">@android:string/cancel</string>
+    <string name="input_name">Input name</string>
 </resources>

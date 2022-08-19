@@ -11,9 +11,7 @@ import androidx.room.PrimaryKey;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 @Entity(tableName = "records")
 public class Record {
@@ -55,7 +53,7 @@ public class Record {
     private String getDateTime() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault())
-                    .format(DateTimeFormatter.ofPattern("yyyy-mm-dd HH:mm"));
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         } else {
             return new Date(timestamp).toString();
         }
