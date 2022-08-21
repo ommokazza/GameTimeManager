@@ -3,4 +3,5 @@
     <string name="add_child">아이 추가</string>
     <string name="input_name">이름을 입력하세요</string>
     <string name="do_you_delete_this">삭제하시겠습니까?</string>
+    <string name="play_time">플레이 시간: %s시간 %s분</string>
 </resources>

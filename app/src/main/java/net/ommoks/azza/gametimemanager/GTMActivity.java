@@ -1,6 +1,7 @@
 package net.ommoks.azza.gametimemanager;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +23,7 @@ import net.ommoks.azza.gametimemanager.ui.DataViewModel;
 import net.ommoks.azza.gametimemanager.ui.UserListAdapter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -90,11 +92,14 @@ public class GTMActivity extends AppCompatActivity
         mAdapter = new UserListAdapter(new ArrayList<>(), this);
         mBinding.userList.setAdapter(mAdapter);
         mDataViewModel.userList.observe(this, childList -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                childList.sort(Comparator.comparingInt(u -> u.id));
+            }
             mAdapter.changeDataSet(childList);
         });
     }
 
-    // UserListAdapter.ItemListener
+    // UserListAdapter.ItemListener [[
     @Override
     public void onUserLongClicked(User user) {
         new MaterialAlertDialogBuilder(this)
@@ -105,4 +110,10 @@ public class GTMActivity extends AppCompatActivity
                         (dialogInterface, i) -> mDataViewModel.deleteUser(user))
                 .show();
     }
+
+    @Override
+    public void onPlayTimeSubmitted(User user, int playTime) {
+        mAdapter.addPlayTime(user.name, playTime);
+    }
+    // UserListAdapter.ItemListener ]]
 }

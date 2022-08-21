@@ -1,6 +1,6 @@
 package net.ommoks.azza.gametimemanager.ui;
 
-import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,25 +16,28 @@ import net.ommoks.azza.gametimemanager.R;
 import net.ommoks.azza.gametimemanager.database.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
     public interface ItemListener {
         void onUserLongClicked(User user);
+        void onPlayTimeSubmitted(User user, int playTime);
     }
 
     private ArrayList<User> mUserList;
-    private ItemListener mItemListener;
+    private final Map<String, Integer> mPlayTimeMap = new HashMap<>();
+    private final ItemListener mItemListener;
 
     private static final int TIME_UNIT = 15;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         final private MaterialTextView name;
-        private AppCompatButton decrease;
-        private AppCompatTextView time;
-        private AppCompatButton increase;
-        private AppCompatButton done;
+        private final AppCompatTextView time;
+        private final AppCompatButton done;
+        private final AppCompatButton playTime;
 
         public ViewHolder(View view, final ItemListener listener) {
             super(view);
@@ -47,20 +50,16 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
                 return true;
             });
             time = view.findViewById(R.id.minutes);
-            decrease = view.findViewById(R.id.decrease);
+            AppCompatButton decrease = view.findViewById(R.id.decrease);
             decrease.setOnClickListener(view1 -> calculateTime(-TIME_UNIT));
-            increase = view.findViewById(R.id.increase);
+            AppCompatButton increase = view.findViewById(R.id.increase);
             increase.setOnClickListener(view1 -> calculateTime(TIME_UNIT));
             done = view.findViewById(R.id.done);
-            done.setOnClickListener(view12 -> {
-                int minutes = Integer.valueOf(time.getText().toString());
-                time.setText("0");
-                //TODO: call listener to submit time
-            });
+            playTime = view.findViewById(R.id.play_time);
         }
 
         private void calculateTime(int value) {
-            int minutes = Integer.valueOf(time.getText().toString());
+            int minutes = Integer.parseInt(time.getText().toString());
             minutes += value;
             time.setText(String.valueOf(minutes));
         }
@@ -76,6 +75,15 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    public void addPlayTime(String name, int playTime) {
+        if (!mPlayTimeMap.containsKey(name)) {
+            mPlayTimeMap.put(name, 0);
+        }
+        int prevPlayTime = mPlayTimeMap.get(name);
+        mPlayTimeMap.put(name, prevPlayTime + playTime);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -86,8 +94,29 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder vh, int position) {
-        vh.name.setText(mUserList.get(position).name);
+        String name = mUserList.get(position).name;
+        vh.name.setText(name);
         vh.name.setTag(mUserList.get(position));
+
+        vh.done.setOnClickListener(view12 -> {
+            int minutes = Integer.parseInt(vh.time.getText().toString());
+            vh.time.setText("0");
+            if (mItemListener != null) {
+                mItemListener.onPlayTimeSubmitted(mUserList.get(position), minutes);
+            }
+        });
+
+        if (!mPlayTimeMap.containsKey(name)) {
+            mPlayTimeMap.put(name, 0);
+        }
+        vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), mPlayTimeMap.get(name)));
+
+    }
+
+    private String getPlayTimeText(Context context, Integer playTime) {
+        return context.getString(R.string.play_time,
+                String.valueOf(playTime / 60),
+                String.valueOf(playTime % 60));
     }
 
     @Override
