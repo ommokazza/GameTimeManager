@@ -4,50 +4,74 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingHorizontal="8dp"
+    android:orientation="vertical"
+    android:paddingHorizontal="12dp"
     android:paddingVertical="4dp"
     android:gravity="center_vertical" >
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/name"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textAppearance="?attr/textAppearanceHeadline5" />
+        android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="?attr/textAppearanceHeadline5" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/decrease"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.IconButton"
+            app:icon="@drawable/remove_48px"
+            app:iconPadding="0dp"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/minutes"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:text="@string/zero" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/increase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.IconButton"
+            app:icon="@drawable/add_48px"
+            app:iconPadding="0dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="@android:color/holo_blue_light"
+            style="@style/Widget.Material3.Button.IconButton"
+            app:icon="@drawable/done_48px"
+            app:iconPadding="0dp" />
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/decrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.Material3.Button.IconButton"
-        app:icon="@drawable/remove_48px"
-        app:iconPadding="0dp"/>
+        android:id="@+id/play_time"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/play_time_view_height"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_gravity="center"
+        android:layout_marginStart="0dp"
+        android:layout_marginVertical="0dp"
+        android:insetTop="0dp"
+        android:paddingVertical="0dp"
+        android:clickable="false"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:textStyle="bold" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/minutes"
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceHeadline5"
-        android:gravity="center_horizontal"
-        android:text="@string/zero" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/increase"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.Material3.Button.IconButton"
-        app:icon="@drawable/add_48px"
-        app:iconPadding="0dp"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/done"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@android:color/holo_blue_light"
-        style="@style/Widget.Material3.Button.IconButton"
-        app:icon="@drawable/done_48px"
-        app:iconPadding="0dp" />
 
 </LinearLayout>
