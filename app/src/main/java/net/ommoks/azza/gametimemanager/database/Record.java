@@ -22,13 +22,13 @@ public class Record {
     public int weekIndex;   // Just to identify same week records. Not week number in a year.
 
     @ColumnInfo(name = "type")
-    public int type;    // 0: normal log record, 1: use record
+    public String type;    // Refer to Common.DB_RECORD_TYPE_*
 
     @ColumnInfo(name = "timestamp")
     public long timestamp;
 
     @ColumnInfo(name = "use_time")
-    public long useTime;    // time in minutes
+    public int useTime;    // time in minutes
 
     @ColumnInfo(name = "user")
     public String user;

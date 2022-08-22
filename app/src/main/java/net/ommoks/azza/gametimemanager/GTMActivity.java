@@ -1,7 +1,8 @@
 package net.ommoks.azza.gametimemanager;
 
+import static java.util.stream.Collectors.groupingBy;
+
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import net.ommoks.azza.gametimemanager.common.Common;
+import net.ommoks.azza.gametimemanager.database.Record;
 import net.ommoks.azza.gametimemanager.database.User;
 import net.ommoks.azza.gametimemanager.databinding.ActivityGtmBinding;
 import net.ommoks.azza.gametimemanager.ui.AddChildDialog;
@@ -24,6 +27,8 @@ import net.ommoks.azza.gametimemanager.ui.UserListAdapter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -83,20 +88,35 @@ public class GTMActivity extends AppCompatActivity
 
     @SuppressLint("NotifyDataSetChanged")
     private void applyViewModel() {
-        mDataViewModel.weekIndex.observe(this, integer -> {
-            mWeekIndex = integer;
-            Log.d(TAG, "Week Index = " + integer);
-        });
-        mDataViewModel.fetchWeekIndex();
-
         mAdapter = new UserListAdapter(new ArrayList<>(), this);
         mBinding.userList.setAdapter(mAdapter);
-        mDataViewModel.userList.observe(this, childList -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                childList.sort(Comparator.comparingInt(u -> u.id));
-            }
+        mDataViewModel.users.observe(this, childList -> {
+            childList.sort(Comparator.comparingInt(u -> u.id));
             mAdapter.changeDataSet(childList);
         });
+        mDataViewModel.fetchAllUsers();
+
+        mDataViewModel.weekIndex.observe(this, weekIndex -> {
+            if (weekIndex >= 0) {
+                mWeekIndex = weekIndex;
+                Log.d(TAG, "Week Index = " + weekIndex);
+            }
+        });
+        mDataViewModel.fetchCurrentWeekIndex();
+
+        mDataViewModel.latestWeekRecords.observe(this, records -> {
+            Map<String, List<Record>> groupByName = records.stream()
+                    .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
+                    .collect(groupingBy(r -> r.user));
+
+            groupByName.forEach((name, records1) -> {
+                int totalPlayTime = records1.stream()
+                        .mapToInt(r -> r.useTime)
+                        .sum();
+                mAdapter.addPlayTime(name, totalPlayTime);
+            });
+        });
+        mDataViewModel.fetchLatestWeekRecords();
     }
 
     // UserListAdapter.ItemListener [[
@@ -114,6 +134,14 @@ public class GTMActivity extends AppCompatActivity
     @Override
     public void onPlayTimeSubmitted(User user, int playTime) {
         mAdapter.addPlayTime(user, playTime);
+        Record r = new Record();
+        r.weekIndex = mWeekIndex;
+        r.type = Common.DB_RECORD_TYPE_RECORD;
+        r.timestamp = System.currentTimeMillis();
+        r.useTime = playTime;
+        r.user = user.name;
+        r.comment = "";
+        mDataViewModel.insertRecord(r);
     }
     // UserListAdapter.ItemListener ]]
 }
