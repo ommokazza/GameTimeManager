@@ -113,7 +113,7 @@ public class GTMActivity extends AppCompatActivity
 
     @Override
     public void onPlayTimeSubmitted(User user, int playTime) {
-        mAdapter.addPlayTime(user.name, playTime);
+        mAdapter.addPlayTime(user, playTime);
     }
     // UserListAdapter.ItemListener ]]
 }

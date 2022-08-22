@@ -48,13 +48,16 @@
             app:iconPadding="0dp"/>
 
         <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button.TonalButton.Icon"
             android:id="@+id/done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:backgroundTint="@android:color/holo_blue_light"
-            style="@style/Widget.Material3.Button.IconButton"
+            android:enabled="false"
+            android:minWidth="48dp"
+            android:paddingHorizontal="20dp"
             app:icon="@drawable/done_48px"
+            app:iconGravity="textStart"
             app:iconPadding="0dp" />
 
     </LinearLayout>

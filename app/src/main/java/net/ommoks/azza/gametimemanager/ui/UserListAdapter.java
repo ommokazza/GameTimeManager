@@ -62,6 +62,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             int minutes = Integer.parseInt(time.getText().toString());
             minutes += value;
             time.setText(String.valueOf(minutes));
+            done.setEnabled(minutes != 0);
         }
     }
 
@@ -75,13 +76,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         notifyDataSetChanged();
     }
 
-    public void addPlayTime(String name, int playTime) {
-        if (!mPlayTimeMap.containsKey(name)) {
-            mPlayTimeMap.put(name, 0);
+    public void addPlayTime(User user, int playTime) {
+        if (!mPlayTimeMap.containsKey(user.name)) {
+            mPlayTimeMap.put(user.name, 0);
         }
-        int prevPlayTime = mPlayTimeMap.get(name);
-        mPlayTimeMap.put(name, prevPlayTime + playTime);
-        notifyDataSetChanged();
+        int prevPlayTime = mPlayTimeMap.get(user.name);
+        mPlayTimeMap.put(user.name, prevPlayTime + playTime);
+        notifyItemChanged(mUserList.indexOf(user));
     }
 
     @NonNull
@@ -98,9 +99,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         vh.name.setText(name);
         vh.name.setTag(mUserList.get(position));
 
-        vh.done.setOnClickListener(view12 -> {
+        vh.done.setOnClickListener(doneBtn -> {
             int minutes = Integer.parseInt(vh.time.getText().toString());
             vh.time.setText("0");
+            vh.done.setEnabled(false);
             if (mItemListener != null) {
                 mItemListener.onPlayTimeSubmitted(mUserList.get(position), minutes);
             }
@@ -110,7 +112,6 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             mPlayTimeMap.put(name, 0);
         }
         vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), mPlayTimeMap.get(name)));
-
     }
 
     private String getPlayTimeText(Context context, Integer playTime) {
