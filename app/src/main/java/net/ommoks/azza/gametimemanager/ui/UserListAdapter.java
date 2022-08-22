@@ -1,6 +1,7 @@
 package net.ommoks.azza.gametimemanager.ui;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
+
+    private static final String TAG = "UserListAdapter";
 
     public interface ItemListener {
         void onUserLongClicked(User user);
@@ -74,6 +77,26 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public void changeDataSet(ArrayList<User> userList) {
         mUserList = userList;
         notifyDataSetChanged();
+    }
+
+    public void addPlayTime(String userName, int playTime) {
+        if (isValidName(userName)) {
+            addPlayTime(getUserByName(userName), playTime);
+        } else {
+            Log.e(TAG, "addPlayTime() : Can't find user - " + userName);
+        }
+    }
+
+    private boolean isValidName(String userName) {
+        return mUserList.stream()
+                .anyMatch(r -> r.name.equals(userName));
+    }
+
+    private User getUserByName(String userName) {
+        return mUserList.stream()
+                .filter(r -> r.name.equals(userName))
+                .findFirst()
+                .orElse(null);
     }
 
     public void addPlayTime(User user, int playTime) {
