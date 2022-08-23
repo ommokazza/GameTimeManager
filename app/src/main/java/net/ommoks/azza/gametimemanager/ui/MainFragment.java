@@ -1,68 +1,77 @@
-package net.ommoks.azza.gametimemanager;
+package net.ommoks.azza.gametimemanager.ui;
 
 import static java.util.stream.Collectors.groupingBy;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import net.ommoks.azza.gametimemanager.R;
 import net.ommoks.azza.gametimemanager.common.Common;
 import net.ommoks.azza.gametimemanager.database.Record;
 import net.ommoks.azza.gametimemanager.database.User;
-import net.ommoks.azza.gametimemanager.databinding.ActivityGtmBinding;
-import net.ommoks.azza.gametimemanager.ui.AddChildDialog;
-import net.ommoks.azza.gametimemanager.ui.DataViewModel;
-import net.ommoks.azza.gametimemanager.ui.UserListAdapter;
+import net.ommoks.azza.gametimemanager.databinding.FragmentMainBinding;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class GTMActivity extends AppCompatActivity
-        implements AddChildDialog.Listener, UserListAdapter.ItemListener {
+public class MainFragment extends Fragment
+        implements AddChildDialog.Listener, UserListAdapter.ItemListener{
 
-    private static final String TAG = "GTMActivity";
+    private static final String TAG = "GTM/MainFragment";
 
-    final private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
-    private ActivityGtmBinding mBinding;
+    private FragmentMainBinding mBinding;
 
     private DataViewModel mDataViewModel;
     private UserListAdapter mAdapter;
-
     private int mWeekIndex = 0;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mBinding = ActivityGtmBinding.inflate(getLayoutInflater());
-        setContentView(mBinding.getRoot());
-        mBinding.userList.setLayoutManager(new LinearLayoutManager(this));
-        mBinding.userList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-
-        mDataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
-        applyViewModel();
+    public MainFragment() {
+        // Required empty public constructor
+        setHasOptionsMenu(true);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            // Handle arguments. Currently nothing to do.
+        }
+
+        mDataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+
+        mBinding = FragmentMainBinding.bind(view);
+        mBinding.userList.addItemDecoration(new DividerItemDecoration((requireActivity()), DividerItemDecoration.VERTICAL));
+
+        applyViewModel();
+        return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu, menu);
-        return true;
     }
 
     @Override
@@ -70,34 +79,22 @@ public class GTMActivity extends AppCompatActivity
         if (item.getItemId() == R.id.add_child) {
             new AddChildDialog()
                     .setListener(this)
-                    .show(getSupportFragmentManager(), "add_child");
+                    .show(requireActivity().getSupportFragmentManager(), "add_child");
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mExecutorService.shutdown();
-    }
-
-    @Override
-    public void onChildAdded(String name) {
-        mExecutorService.submit(() -> mDataViewModel.addUser(new User(name)));
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
     private void applyViewModel() {
         mAdapter = new UserListAdapter(new ArrayList<>(), this);
         mBinding.userList.setAdapter(mAdapter);
-        mDataViewModel.users.observe(this, childList -> {
+        mDataViewModel.users.observe(getViewLifecycleOwner(), childList -> {
             childList.sort(Comparator.comparingInt(u -> u.id));
             mAdapter.changeDataSet(childList);
         });
         mDataViewModel.fetchAllUsers();
 
-        mDataViewModel.weekIndex.observe(this, weekIndex -> {
+        mDataViewModel.weekIndex.observe(getViewLifecycleOwner(), weekIndex -> {
             if (weekIndex >= 0) {
                 mWeekIndex = weekIndex;
                 Log.d(TAG, "Week Index = " + weekIndex);
@@ -105,7 +102,7 @@ public class GTMActivity extends AppCompatActivity
         });
         mDataViewModel.fetchCurrentWeekIndex();
 
-        mDataViewModel.latestWeekRecords.observe(this, records -> {
+        mDataViewModel.latestWeekRecords.observe(getViewLifecycleOwner(), records -> {
             Map<String, List<Record>> groupByName = records.stream()
                     .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
                     .collect(groupingBy(r -> r.user));
@@ -120,10 +117,17 @@ public class GTMActivity extends AppCompatActivity
         mDataViewModel.fetchLatestWeekRecords();
     }
 
+    // AddChildDialog.Listener [[
+    @Override
+    public void onChildAdded(String name) {
+        mDataViewModel.addUser(new User(name));
+    }
+    // AddChildDialog.Listener ]]
+
     // UserListAdapter.ItemListener [[
     @Override
     public void onUserLongClicked(User user) {
-        new MaterialAlertDialogBuilder(this)
+        new MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(R.string.do_you_delete_this)
                 .setNegativeButton(android.R.string.no,
                         (dialogInterface, i) -> dialogInterface.dismiss())
@@ -143,7 +147,8 @@ public class GTMActivity extends AppCompatActivity
         r.user = user.name;
         r.comment = "";
         mDataViewModel.insertRecord(r);
-        Toast.makeText(this, getString(R.string.toast_msg_when_adding_time, user.name, String.valueOf(playTime)),
+        Toast.makeText(requireActivity(),
+                getString(R.string.toast_msg_when_adding_time, user.name, String.valueOf(playTime)),
                 Toast.LENGTH_SHORT).show();
     }
     // UserListAdapter.ItemListener ]]
