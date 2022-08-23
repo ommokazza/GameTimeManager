@@ -5,15 +5,16 @@ import static java.util.stream.Collectors.groupingBy;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 
@@ -64,25 +65,20 @@ public class MainFragment extends Fragment
 
         mBinding = FragmentMainBinding.bind(view);
         mBinding.userList.addItemDecoration(new DividerItemDecoration((requireActivity()), DividerItemDecoration.VERTICAL));
+        mBinding.topAppBar.setOnMenuItemClickListener(this::onMenuItemClick);
 
         applyViewModel();
         return view;
     }
 
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.add_child) {
             new AddChildDialog()
                     .setListener(this)
                     .show(requireActivity().getSupportFragmentManager(), "add_child");
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     private void applyViewModel() {
