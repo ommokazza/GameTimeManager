@@ -18,7 +18,9 @@ import net.ommoks.azza.gametimemanager.database.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
@@ -27,6 +29,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public interface ItemListener {
         void onUserLongClicked(User user);
         void onPlayTimeSubmitted(User user, int playTime);
+        void onPlayTimeClicked(User user);
     }
 
     private ArrayList<User> mUserList;
@@ -135,6 +138,11 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             mPlayTimeMap.put(name, 0);
         }
         vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), mPlayTimeMap.get(name)));
+        vh.playTime.setOnClickListener(view -> {
+            if (mItemListener != null) {
+                mItemListener.onPlayTimeClicked((User) vh.name.getTag());
+            }
+        });
     }
 
     private String getPlayTimeText(Context context, Integer playTime) {
@@ -146,5 +154,23 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mUserList.size();
+    }
+
+    public List<String> getSummaryTextList(Context context) {
+        List<String> summaryTextList = new ArrayList<>();
+        for (User user : mUserList) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(user.name)
+                    .append(" - ")
+                    .append(getPlayTimeText(context, mPlayTimeMap.get(user.name)));
+            summaryTextList.add(sb.toString());
+        }
+
+        return summaryTextList;
+    }
+
+    public void clearTotalPlayTime() {
+        mPlayTimeMap.keySet().forEach(key -> mPlayTimeMap.put(key, 0));
+        notifyDataSetChanged();
     }
 }

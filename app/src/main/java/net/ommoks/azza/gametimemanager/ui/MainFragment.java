@@ -10,11 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 
@@ -77,27 +73,63 @@ public class MainFragment extends Fragment
                     .setListener(this)
                     .show(requireActivity().getSupportFragmentManager(), "add_child");
             return true;
+        } else if (item.getItemId() == R.id.new_week) {
+            new MaterialAlertDialogBuilder(requireActivity())
+                    .setTitle(R.string.start_a_new_week)
+                    .setPositiveButton(R.string.ok, (di, which) -> startNewWeek())
+                    .setNegativeButton(R.string.cancel, (di, which) -> di.dismiss())
+                    .show();
+            return true;
+        } else {
+            return false;
         }
-        return false;
+    }
+
+    private void startNewWeek() {
+        Toast.makeText(requireActivity(), R.string.start_a_new_week, Toast.LENGTH_SHORT).show();
+        long timestamp = System.currentTimeMillis();
+
+        // Record summary of this week
+        Record summary = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
+        summary.timestamp = ++timestamp;
+        summary.comment = getString(R.string.week_summary);
+        mDataViewModel.insertRecord(summary);
+        for (String playTime : mAdapter.getSummaryTextList(requireActivity())) {
+            Record r = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
+            r.timestamp = ++timestamp;
+            r.comment = playTime;
+            mDataViewModel.insertRecord(r);
+        }
+
+        mWeekIndex++;
+        mAdapter.clearTotalPlayTime();
+
+        // Record notice for new week
+        Record notice = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
+        notice.timestamp = ++timestamp;
+        notice.comment = getString(R.string.start_a_new_week);
+        mDataViewModel.insertRecord(notice);
+
     }
 
     private void applyViewModel() {
         mAdapter = new UserListAdapter(new ArrayList<>(), this);
         mBinding.userList.setAdapter(mAdapter);
+        mDataViewModel.fetchAllUsers();
         mDataViewModel.users.observe(getViewLifecycleOwner(), childList -> {
             childList.sort(Comparator.comparingInt(u -> u.id));
             mAdapter.changeDataSet(childList);
         });
-        mDataViewModel.fetchAllUsers();
 
+        mDataViewModel.fetchCurrentWeekIndex();
         mDataViewModel.weekIndex.observe(getViewLifecycleOwner(), weekIndex -> {
             if (weekIndex >= 0) {
                 mWeekIndex = weekIndex;
                 Log.d(TAG, "Week Index = " + weekIndex);
             }
         });
-        mDataViewModel.fetchCurrentWeekIndex();
 
+        mDataViewModel.fetchLatestWeekRecords();
         mDataViewModel.latestWeekRecords.observe(getViewLifecycleOwner(), records -> {
             Map<String, List<Record>> groupByName = records.stream()
                     .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
@@ -110,7 +142,6 @@ public class MainFragment extends Fragment
                 mAdapter.addPlayTime(name, totalPlayTime);
             });
         });
-        mDataViewModel.fetchLatestWeekRecords();
     }
 
     // AddChildDialog.Listener [[
@@ -146,6 +177,20 @@ public class MainFragment extends Fragment
         Toast.makeText(requireActivity(),
                 getString(R.string.toast_msg_when_adding_time, user.name, String.valueOf(playTime)),
                 Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPlayTimeClicked(User user) {
+        //TODO: Test is a test code. [[
+        new Thread(() -> {
+            if (mWeekIndex > 1) {
+                mDataViewModel.getRecordsWithWeekIndex(mWeekIndex-1)
+                        .forEach(r -> Log.d(TAG, r.toString()));
+            }
+            mDataViewModel.getRecordsWithWeekIndex(mWeekIndex)
+                    .forEach(r -> Log.d(TAG, r.toString()));
+        }).start();
+        //TODO: Test is a test code. ]]
     }
     // UserListAdapter.ItemListener ]]
 }

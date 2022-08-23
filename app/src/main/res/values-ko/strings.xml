@@ -6,4 +6,7 @@
     <string name="play_time">플레이 시간: %s시간 %s분</string>
     <string name="toast_msg_when_adding_time">%s : %s분 추가</string>
     <string name="subtitle_in_main_fragment">아이들의 게임 시간을 기록하세요</string>
+    <string name="new_week">새로운 주간</string>
+    <string name="start_a_new_week">새로운 주간을 시작합니다</string>
+    <string name="week_summary">이번 주 플레이 시간:</string>
 </resources>
