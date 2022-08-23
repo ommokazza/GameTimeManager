@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -142,6 +143,8 @@ public class GTMActivity extends AppCompatActivity
         r.user = user.name;
         r.comment = "";
         mDataViewModel.insertRecord(r);
+        Toast.makeText(this, getString(R.string.toast_msg_when_adding_time, user.name, String.valueOf(playTime)),
+                Toast.LENGTH_SHORT).show();
     }
     // UserListAdapter.ItemListener ]]
 }

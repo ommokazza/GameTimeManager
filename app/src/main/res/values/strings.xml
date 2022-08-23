@@ -8,4 +8,5 @@
     <string name="input_name">Input name</string>
     <string name="do_you_delete_this">Do you delete this?</string>
     <string name="play_time">Play Time: %s hour(s) %s minute(s)</string>
+    <string name="toast_msg_when_adding_time">%s : Add %s minutes</string>
 </resources>
