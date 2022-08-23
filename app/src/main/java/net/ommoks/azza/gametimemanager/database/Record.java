@@ -58,4 +58,14 @@ public class Record {
             return new Date(timestamp).toString();
         }
     }
+
+    @Ignore
+    public static Record newRecord(int weekIndex, String type) {
+        Record r = new Record();
+        r.weekIndex = weekIndex;
+        r.type = type;
+        r.timestamp = System.currentTimeMillis();
+
+        return r;
+    }
 }

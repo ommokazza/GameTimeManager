@@ -6,4 +6,10 @@
         android:id="@+id/add_child"
         android:title="@string/add_child"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/new_week"
+        android:title="@string/new_week"
+        app:showAsAction="never" />
+
 </menu>

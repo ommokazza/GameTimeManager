@@ -3,6 +3,7 @@ package net.ommoks.azza.gametimemanager.ui;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -63,12 +64,11 @@ public class DataViewModel extends AndroidViewModel {
         });
     }
 
-    public void fetchRecordsWithWeekIndex(int weekIndex) {
-        executorService.submit(() -> {
-            List<Record> result = recordDao.getAllWithWeekIndex(weekIndex);
-            Collections.sort(result, (r1, r2) -> (int) (r1.timestamp - r2.timestamp));
-            _weekRecords.postValue(result);
-        });
+    @WorkerThread
+    public List<Record> getRecordsWithWeekIndex(int weekIndex) {
+        List<Record> result = recordDao.getAllWithWeekIndex(weekIndex);
+        Collections.sort(result, (r1, r2) -> (int) (r1.timestamp - r2.timestamp));
+        return result;
     }
 
     public void fetchLatestWeekRecords() {
