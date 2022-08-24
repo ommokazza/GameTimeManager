@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 
@@ -94,10 +95,11 @@ public class MainFragment extends Fragment
         summary.timestamp = ++timestamp;
         summary.comment = getString(R.string.week_summary);
         mDataViewModel.insertRecord(summary);
-        for (String playTime : mAdapter.getSummaryTextList(requireActivity())) {
-            Record r = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
+        for (User user : mDataViewModel.users.getValue()) {
+            Record r = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_SUMMARY);
             r.timestamp = ++timestamp;
-            r.comment = playTime;
+            r.user = user.name;
+            r.useTime = mAdapter.getTotalPlayTime(user.name);
             mDataViewModel.insertRecord(r);
         }
 

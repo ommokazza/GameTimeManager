@@ -40,13 +40,8 @@ public class Record {
     @Override
     @Ignore
     public String toString() {
-        return "id = " + id
-                + ", weekIndex = " + weekIndex
-                + ", type = " + type
-                + ", timestamp = " + getDateTime()
-                + ", useTime = " + useTime
-                + ", user = " + user
-                + ", comment = " + comment;
+        return id + ", " + weekIndex + ", " + type + ", " + getDateTime() + ", " + useTime
+                + ", " + user + ", " + comment;
     }
 
     @Ignore
@@ -65,6 +60,8 @@ public class Record {
         r.weekIndex = weekIndex;
         r.type = type;
         r.timestamp = System.currentTimeMillis();
+        r.user = "";
+        r.comment = "";
 
         return r;
     }

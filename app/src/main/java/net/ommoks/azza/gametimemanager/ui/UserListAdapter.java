@@ -18,9 +18,7 @@ import net.ommoks.azza.gametimemanager.database.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
@@ -156,17 +154,8 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         return mUserList.size();
     }
 
-    public List<String> getSummaryTextList(Context context) {
-        List<String> summaryTextList = new ArrayList<>();
-        for (User user : mUserList) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(user.name)
-                    .append(" - ")
-                    .append(getPlayTimeText(context, mPlayTimeMap.get(user.name)));
-            summaryTextList.add(sb.toString());
-        }
-
-        return summaryTextList;
+    public int getTotalPlayTime(String name) {
+        return mPlayTimeMap.getOrDefault(name, 0);
     }
 
     public void clearTotalPlayTime() {
