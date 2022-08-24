@@ -193,6 +193,12 @@ public class MainFragment extends Fragment
                     .forEach(r -> Log.d(TAG, r.toString()));
         }).start();
         //TODO: Test is a test code. ]]
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.fragment_container, RecordFragment.newInstance(user.name))
+                .setReorderingAllowed(true)
+                .addToBackStack("home")
+                .commit();
     }
     // UserListAdapter.ItemListener ]]
 }

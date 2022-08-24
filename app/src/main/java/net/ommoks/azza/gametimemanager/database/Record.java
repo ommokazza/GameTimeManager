@@ -45,7 +45,7 @@ public class Record {
     }
 
     @Ignore
-    private String getDateTime() {
+    public String getDateTime() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault())
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));

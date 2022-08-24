@@ -8,4 +8,7 @@
     <string name="new_week">새로운 주간</string>
     <string name="start_a_new_week">새로운 주간을 시작합니다</string>
     <string name="week_summary">이번 주 플레이 시간:</string>
+    <string name="record_list_title">플레이 시간 기록</string>
+    <string name="play_time_2">%s시간 %s분</string>
+    <string name="add_minutes">%s분 추가</string>
 </resources>
