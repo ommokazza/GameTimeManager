@@ -9,7 +9,6 @@
     <string name="do_you_delete_this">Do you delete this?</string>
     <string name="play_time">Play Time: %s hour(s) %s minute(s)</string>
     <string name="toast_msg_when_adding_time">%s : Add %s minutes</string>
-    <string name="subtitle_in_main_fragment">Record your children\'s game play time</string>
     <string name="new_week">New Week</string>
     <string name="start_a_new_week">Start a new week?</string>
     <string name="week_summary">Play-time of this week : </string>
