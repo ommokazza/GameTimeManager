@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingHorizontal="12dp"
+    android:paddingVertical="8dp"
     android:gravity="center_vertical">
 
     <com.google.android.material.textview.MaterialTextView
@@ -11,11 +12,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:textAppearance="?attr/textAppearanceLabelSmall" />
+        android:textAppearance="?attr/textAppearanceLabelMedium" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
         android:orientation="horizontal" >
 
         <com.google.android.material.textview.MaterialTextView
@@ -23,7 +25,8 @@
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:textAppearance="?attr/textAppearanceListItemSmall" />
+            android:layout_marginEnd="8dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/log"
@@ -31,8 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:textAppearance="?attr/textAppearanceListItemSmall" />
+            android:textAppearance="?attr/textAppearanceBodyLarge" />
 
     </LinearLayout>
 

@@ -1,6 +1,7 @@
 package net.ommoks.azza.gametimemanager.ui;
 
 import android.content.res.Resources;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,14 +60,18 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
         Record record = mRecordList.get(position);
         Resources res = vh.itemView.getResources();
 
-        vh.timestamp.setText(record.getDateTime());
+        vh.timestamp.setText(String.format("(%s)", record.getDateTime()));
         vh.name.setText(record.user);
+        vh.name.setVisibility(View.VISIBLE);
         if (record.type.equals(Common.DB_RECORD_TYPE_RECORD)) {
             vh.log.setText(res.getString(R.string.add_minutes, String.valueOf(record.useTime)));
         } else if (record.type.equals(Common.DB_RECORD_TYPE_SUMMARY)) {
             vh.log.setText(getPlayTimeText(res, record.useTime));
         } else if (record.type.equals(Common.DB_RECORD_TYPE_COMMENT)) {
             vh.log.setText(record.comment);
+            if (TextUtils.isEmpty(record.user)) {
+                vh.name.setVisibility(View.GONE);
+            }
         } else {
             Log.e(TAG, "What's the problem?");
         }
