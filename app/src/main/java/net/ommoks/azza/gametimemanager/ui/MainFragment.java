@@ -1,7 +1,5 @@
 package net.ommoks.azza.gametimemanager.ui;
 
-import static java.util.stream.Collectors.groupingBy;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,7 +23,6 @@ import net.ommoks.azza.gametimemanager.databinding.FragmentMainBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MainFragment extends Fragment
         implements AddChildDialog.Listener, UserListAdapter.ItemListener{
@@ -74,19 +71,15 @@ public class MainFragment extends Fragment
             ArrayList<User> userList = mDataViewModel.getAllUsers();
             mAdapter.changeDataSet(userList);
 
-
             mWeekIndex = mDataViewModel.getLastWeekIndex();
             Log.d(TAG, "Week Index = " + mWeekIndex);
 
             List<Record> lastWeekRecords = mDataViewModel.getRecordsWithWeekIndex(mWeekIndex);
-            Map<String, List<Record>> groupByName = lastWeekRecords.stream()
-                    .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
-                    .collect(groupingBy(r -> r.user));
-            groupByName.forEach((name, records1) -> {
-                int totalPlayTime = records1.stream()
-                        .mapToInt(r -> r.useTime)
-                        .sum();
-                mAdapter.addPlayTime(name, totalPlayTime);
+            userList.forEach(u -> mAdapter.addPlayTime(u, 0));
+            lastWeekRecords.forEach(r -> {
+                if (r.type.equals(Common.DB_RECORD_TYPE_RECORD)) {
+                    mAdapter.addPlayTime(r.user, r.useTime);
+                }
             });
 
             mBinding.userList.setAdapter(mAdapter);
