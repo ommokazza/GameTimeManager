@@ -175,19 +175,10 @@ public class MainFragment extends Fragment
 
     @Override
     public void onPlayTimeClicked(User user) {
-        //TODO: Test is a test code. [[
-        new Thread(() -> {
-            if (mWeekIndex > 1) {
-                mDataViewModel.getRecordsWithWeekIndex(mWeekIndex-1)
-                        .forEach(r -> Log.d(TAG, r.toString()));
-            }
-            mDataViewModel.getRecordsWithWeekIndex(mWeekIndex)
-                    .forEach(r -> Log.d(TAG, r.toString()));
-        }).start();
-        //TODO: Test is a test code. ]]
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .add(R.id.fragment_container, RecordFragment.newInstance(user.name))
+                .setCustomAnimations(R.anim.slide_in, 0, 0, R.anim.slide_out)
+                .add(R.id.fragment_container, RecordFragment.newInstance(user.name, mWeekIndex))
                 .setReorderingAllowed(true)
                 .addToBackStack("home")
                 .commit();

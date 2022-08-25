@@ -11,4 +11,6 @@
     <string name="record_list_title">플레이 시간 기록</string>
     <string name="play_time_2">%s시간 %s분</string>
     <string name="add_minutes">%s분 추가</string>
+    <string name="prev">이전</string>
+    <string name="next">다음</string>
 </resources>

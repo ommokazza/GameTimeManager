@@ -15,4 +15,6 @@
     <string name="week_summary">Play-time of this week : </string>
     <string name="record_list_title">Play Time Records</string>
     <string name="add_minutes">Add %s minutes</string>
+    <string name="prev">PREV</string>
+    <string name="next">NEXT</string>
 </resources>
