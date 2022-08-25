@@ -24,7 +24,6 @@ import net.ommoks.azza.gametimemanager.database.User;
 import net.ommoks.azza.gametimemanager.databinding.FragmentMainBinding;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +63,36 @@ public class MainFragment extends Fragment
         mBinding.userList.addItemDecoration(new DividerItemDecoration((requireActivity()), DividerItemDecoration.VERTICAL));
         mBinding.topAppBar.setOnMenuItemClickListener(this::onMenuItemClick);
 
-        applyViewModel();
+        initialize();
         return view;
+    }
+
+    private void initialize() {
+        // Asynchronous Initialize
+        mAdapter = new UserListAdapter(new ArrayList<>(), this);
+        new Thread(() -> {
+            ArrayList<User> userList = mDataViewModel.getAllUsers();
+            mAdapter.changeDataSet(userList);
+
+
+            mWeekIndex = mDataViewModel.getLastWeekIndex();
+            Log.d(TAG, "Week Index = " + mWeekIndex);
+
+            List<Record> lastWeekRecords = mDataViewModel.getRecordsWithWeekIndex(mWeekIndex);
+            Map<String, List<Record>> groupByName = lastWeekRecords.stream()
+                    .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
+                    .collect(groupingBy(r -> r.user));
+            groupByName.forEach((name, records1) -> {
+                int totalPlayTime = records1.stream()
+                        .mapToInt(r -> r.useTime)
+                        .sum();
+                mAdapter.addPlayTime(name, totalPlayTime);
+            });
+
+            mBinding.userList.setAdapter(mAdapter);
+
+            applyViewModel();
+        }).start();
     }
 
     public boolean onMenuItemClick(MenuItem item) {
@@ -115,35 +142,7 @@ public class MainFragment extends Fragment
     }
 
     private void applyViewModel() {
-        mAdapter = new UserListAdapter(new ArrayList<>(), this);
-        mBinding.userList.setAdapter(mAdapter);
-        mDataViewModel.fetchAllUsers();
-        mDataViewModel.users.observe(getViewLifecycleOwner(), childList -> {
-            childList.sort(Comparator.comparingInt(u -> u.id));
-            mAdapter.changeDataSet(childList);
-        });
-
-        mDataViewModel.fetchCurrentWeekIndex();
-        mDataViewModel.weekIndex.observe(getViewLifecycleOwner(), weekIndex -> {
-            if (weekIndex >= 0) {
-                mWeekIndex = weekIndex;
-                Log.d(TAG, "Week Index = " + weekIndex);
-            }
-        });
-
-        mDataViewModel.fetchLatestWeekRecords();
-        mDataViewModel.latestWeekRecords.observe(getViewLifecycleOwner(), records -> {
-            Map<String, List<Record>> groupByName = records.stream()
-                    .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
-                    .collect(groupingBy(r -> r.user));
-
-            groupByName.forEach((name, records1) -> {
-                int totalPlayTime = records1.stream()
-                        .mapToInt(r -> r.useTime)
-                        .sum();
-                mAdapter.addPlayTime(name, totalPlayTime);
-            });
-        });
+        // Nothing to do now
     }
 
     // AddChildDialog.Listener [[

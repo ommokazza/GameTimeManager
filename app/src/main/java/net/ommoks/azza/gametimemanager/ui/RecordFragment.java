@@ -70,7 +70,7 @@ public class RecordFragment extends Fragment {
 
     private void loadRecordData() {
         new Thread(() -> {
-            mWeekIndex = mDataViewModel.getCurrentWeekIndex();
+            mWeekIndex = mDataViewModel.getLastWeekIndex();
             mLastWeekIndex = mWeekIndex;
 
             List<Record> recordList = mDataViewModel.getRecordsWithWeekIndex(mWeekIndex).stream()
@@ -79,7 +79,6 @@ public class RecordFragment extends Fragment {
             final RecordListAdapter adapter = new RecordListAdapter(recordList);
             mBinding.recordList.post(() -> mBinding.recordList.setAdapter(adapter));
         }).start();
-
     }
 
     @Override

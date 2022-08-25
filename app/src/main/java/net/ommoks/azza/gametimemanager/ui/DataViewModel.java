@@ -18,6 +18,7 @@ import net.ommoks.azza.gametimemanager.database.UserDao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,16 +33,12 @@ public class DataViewModel extends AndroidViewModel {
     private final @NonNull
     MutableLiveData<Integer> _weekIndex = new MutableLiveData<>(-1);
     private final @NonNull
-    MutableLiveData<List<Record>> _latestWeekRecords = new MutableLiveData<>(new ArrayList<>());
-    private final @NonNull
     MutableLiveData<List<Record>> _weekRecords = new MutableLiveData<>(new ArrayList<>());
 
     public final @NonNull
     LiveData<ArrayList<User>> users = _users;
     public final @NonNull
     LiveData<Integer> weekIndex = _weekIndex;
-    public final @NonNull
-    LiveData<List<Record>> latestWeekRecords = _latestWeekRecords;
     public final @NonNull
     LiveData<List<Record>> weekRecords = _weekRecords;
 
@@ -57,7 +54,7 @@ public class DataViewModel extends AndroidViewModel {
         executorService.submit(() -> recordDao.insert(r));
     }
 
-    public void fetchCurrentWeekIndex() {
+    public void fetchLastWeekIndex() {
         executorService.submit(() -> {
             Record lastOne = recordDao.getLastOne();
             _weekIndex.postValue(lastOne == null ? 0 : lastOne.weekIndex);
@@ -65,31 +62,33 @@ public class DataViewModel extends AndroidViewModel {
     }
 
     @WorkerThread
-    public int getCurrentWeekIndex() {
-        return recordDao.getLastOne().weekIndex;
+    public int getLastWeekIndex() {
+        return Optional.ofNullable(recordDao.getLastOne())
+                .map(record -> record.weekIndex).orElse(0);
+    }
+
+    public void fetchRecordsWithWeekIndex(int weekIndex) {
+        executorService.submit(() -> {
+            List<Record> result = recordDao.getAllWithWeekIndex(weekIndex);
+            result.sort((r1, r2) -> (int) (r1.timestamp - r2.timestamp));
+            _weekRecords.postValue(result);
+        });
     }
 
     @WorkerThread
     public List<Record> getRecordsWithWeekIndex(int weekIndex) {
         List<Record> result = recordDao.getAllWithWeekIndex(weekIndex);
-        Collections.sort(result, (r1, r2) -> (int) (r1.timestamp - r2.timestamp));
+        result.sort((r1, r2) -> (int) (r1.timestamp - r2.timestamp));
         return result;
-    }
-
-    public void fetchLatestWeekRecords() {
-        executorService.submit(() -> {
-            Record lastOne = recordDao.getLastOne();
-            List<Record> result = new ArrayList<>();
-            if (lastOne != null) {
-                result = recordDao.getAllWithWeekIndex(lastOne.weekIndex);
-                Collections.sort(result, (r1, r2) -> (int) (r1.timestamp - r2.timestamp));
-            }
-            _latestWeekRecords.postValue(result);
-        });
     }
 
     public void fetchAllUsers() {
         executorService.submit(() -> _users.postValue(new ArrayList<>(userDao.getAll())));
+    }
+
+    @WorkerThread
+    public ArrayList<User> getAllUsers() {
+        return new ArrayList<>(userDao.getAll());
     }
 
     public void addUser(User user) {
