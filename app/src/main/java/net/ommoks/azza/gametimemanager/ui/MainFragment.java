@@ -1,7 +1,5 @@
 package net.ommoks.azza.gametimemanager.ui;
 
-import static java.util.stream.Collectors.groupingBy;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 
@@ -24,7 +23,6 @@ import net.ommoks.azza.gametimemanager.databinding.FragmentMainBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MainFragment extends Fragment
         implements AddChildDialog.Listener, UserListAdapter.ItemListener{
@@ -73,19 +71,15 @@ public class MainFragment extends Fragment
             ArrayList<User> userList = mDataViewModel.getAllUsers();
             mAdapter.changeDataSet(userList);
 
-
             mWeekIndex = mDataViewModel.getLastWeekIndex();
             Log.d(TAG, "Week Index = " + mWeekIndex);
 
             List<Record> lastWeekRecords = mDataViewModel.getRecordsWithWeekIndex(mWeekIndex);
-            Map<String, List<Record>> groupByName = lastWeekRecords.stream()
-                    .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
-                    .collect(groupingBy(r -> r.user));
-            groupByName.forEach((name, records1) -> {
-                int totalPlayTime = records1.stream()
-                        .mapToInt(r -> r.useTime)
-                        .sum();
-                mAdapter.addPlayTime(name, totalPlayTime);
+            userList.forEach(u -> mAdapter.addPlayTime(u, 0));
+            lastWeekRecords.forEach(r -> {
+                if (r.type.equals(Common.DB_RECORD_TYPE_RECORD)) {
+                    mAdapter.addPlayTime(r.user, r.useTime);
+                }
             });
 
             mBinding.userList.setAdapter(mAdapter);
@@ -121,10 +115,11 @@ public class MainFragment extends Fragment
         summary.timestamp = ++timestamp;
         summary.comment = getString(R.string.week_summary);
         mDataViewModel.insertRecord(summary);
-        for (String playTime : mAdapter.getSummaryTextList(requireActivity())) {
-            Record r = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
+        for (User user : mDataViewModel.users.getValue()) {
+            Record r = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_SUMMARY);
             r.timestamp = ++timestamp;
-            r.comment = playTime;
+            r.user = user.name;
+            r.useTime = mAdapter.getTotalPlayTime(user.name);
             mDataViewModel.insertRecord(r);
         }
 
@@ -180,16 +175,13 @@ public class MainFragment extends Fragment
 
     @Override
     public void onPlayTimeClicked(User user) {
-        //TODO: Test is a test code. [[
-        new Thread(() -> {
-            if (mWeekIndex > 1) {
-                mDataViewModel.getRecordsWithWeekIndex(mWeekIndex-1)
-                        .forEach(r -> Log.d(TAG, r.toString()));
-            }
-            mDataViewModel.getRecordsWithWeekIndex(mWeekIndex)
-                    .forEach(r -> Log.d(TAG, r.toString()));
-        }).start();
-        //TODO: Test is a test code. ]]
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in, 0, 0, R.anim.slide_out)
+                .add(R.id.fragment_container, RecordFragment.newInstance(user.name, mWeekIndex))
+                .setReorderingAllowed(true)
+                .addToBackStack("home")
+                .commit();
     }
     // UserListAdapter.ItemListener ]]
 }

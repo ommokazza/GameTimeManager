@@ -78,7 +78,7 @@ public class DataViewModel extends AndroidViewModel {
     @WorkerThread
     public List<Record> getRecordsWithWeekIndex(int weekIndex) {
         List<Record> result = recordDao.getAllWithWeekIndex(weekIndex);
-        Collections.sort(result, (r1, r2) -> (int) (r1.timestamp - r2.timestamp));
+        result.sort((r1, r2) -> (int) (r1.timestamp - r2.timestamp));
         return result;
     }
 

@@ -1,5 +1,6 @@
 package net.ommoks.azza.gametimemanager.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,9 +19,8 @@ import net.ommoks.azza.gametimemanager.database.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
@@ -77,6 +77,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         mItemListener = listener;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void changeDataSet(ArrayList<User> userList) {
         mUserList = userList;
         notifyDataSetChanged();
@@ -134,10 +135,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             }
         });
 
-        if (!mPlayTimeMap.containsKey(name)) {
-            mPlayTimeMap.put(name, 0);
+        if (mPlayTimeMap.containsKey(name)) {
+            vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), mPlayTimeMap.get(name)));
         }
-        vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), mPlayTimeMap.get(name)));
         vh.playTime.setOnClickListener(view -> {
             if (mItemListener != null) {
                 mItemListener.onPlayTimeClicked((User) vh.name.getTag());
@@ -156,19 +156,11 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         return mUserList.size();
     }
 
-    public List<String> getSummaryTextList(Context context) {
-        List<String> summaryTextList = new ArrayList<>();
-        for (User user : mUserList) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(user.name)
-                    .append(" - ")
-                    .append(getPlayTimeText(context, mPlayTimeMap.get(user.name)));
-            summaryTextList.add(sb.toString());
-        }
-
-        return summaryTextList;
+    public int getTotalPlayTime(String name) {
+        return Optional.ofNullable(mPlayTimeMap.get(name)).orElse(0);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void clearTotalPlayTime() {
         mPlayTimeMap.keySet().forEach(key -> mPlayTimeMap.put(key, 0));
         notifyDataSetChanged();
