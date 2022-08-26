@@ -165,4 +165,16 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         mPlayTimeMap.keySet().forEach(key -> mPlayTimeMap.put(key, 0));
         notifyDataSetChanged();
     }
+
+    public String getSummaryText(Context context) {
+        StringBuffer sb = new StringBuffer();
+        for (User user : mUserList) {
+            sb.append(user.name)
+                    .append(" : ")
+                    .append(getPlayTimeText(context, getTotalPlayTime(user.name)))
+                    .append("\n");
+        }
+        sb.delete(sb.length() - 1, sb.length());
+        return sb.toString();
+    }
 }

@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/share"
+        android:icon="@drawable/share_24px"
+        android:title="@string/share"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/add_child"
         android:title="@string/add_child"
         app:showAsAction="never" />

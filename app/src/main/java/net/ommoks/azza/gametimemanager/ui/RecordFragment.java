@@ -1,7 +1,9 @@
 package net.ommoks.azza.gametimemanager.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,10 +38,9 @@ public class RecordFragment extends Fragment {
 
     private MutableLiveData<Integer> _mWeekIndex;
     private LiveData<Integer> mWeekIndex;
-//    private Map<Integer, List<Record>> mRecordCache = new ArrayMap<>();
 
     public RecordFragment() {
-        // Required empty public constructor
+        setHasOptionsMenu(true);
     }
 
     public static RecordFragment newInstance(String name, int weekIndex) {
@@ -72,6 +73,7 @@ public class RecordFragment extends Fragment {
         mBinding.topAppBar.setTitle(getString(R.string.record_list_title)
                 + ((mName == null) ? "" : (" - " + mName)));
         mBinding.topAppBar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
+        mBinding.topAppBar.setOnMenuItemClickListener(this::onMenuItemClick);
 
         updateNavigationButtons(mLastWeekIndex);
         mWeekIndex.observe(getViewLifecycleOwner(), this::weekIndexChanged);
@@ -84,6 +86,25 @@ public class RecordFragment extends Fragment {
 
         loadViewData();
         return view;
+    }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        if (item.getItemId() == R.id.share) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getRecordListText());
+            sendIntent.setType("text/plain");
+
+            Intent shareIntent = Intent.createChooser(sendIntent, null);
+            startActivity(shareIntent);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private String getRecordListText() {
+        return mAdapter.getRecordListText(requireActivity());
     }
 
     private void loadViewData() {
