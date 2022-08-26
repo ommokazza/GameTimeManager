@@ -17,4 +17,5 @@
     <string name="add_minutes">Add %s minutes</string>
     <string name="prev">PREV</string>
     <string name="next">NEXT</string>
+    <string name="share">Share</string>
 </resources>

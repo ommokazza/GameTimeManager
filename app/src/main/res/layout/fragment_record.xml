@@ -18,6 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:minHeight="?attr/actionBarSize"
             app:navigationIcon="@drawable/chevron_left_48px"
+            app:menu="@menu/record_fragment_menu"
             style="@style/Widget.MaterialComponents.Toolbar.Primary" />
 
     </com.google.android.material.appbar.AppBarLayout>

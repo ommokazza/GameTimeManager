@@ -1,5 +1,6 @@
 package net.ommoks.azza.gametimemanager.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,7 +37,6 @@ public class MainFragment extends Fragment
     private int mWeekIndex = 0;
 
     public MainFragment() {
-        // Required empty public constructor
         setHasOptionsMenu(true);
     }
 
@@ -101,9 +101,22 @@ public class MainFragment extends Fragment
                     .setNegativeButton(R.string.cancel, (di, which) -> di.dismiss())
                     .show();
             return true;
+        } else if (item.getItemId() == R.id.share) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getSummaryText());
+            sendIntent.setType("text/plain");
+
+            Intent shareIntent = Intent.createChooser(sendIntent, null);
+            startActivity(shareIntent);
+            return true;
         } else {
             return false;
         }
+    }
+
+    private String getSummaryText() {
+        return mAdapter.getSummaryText(requireActivity());
     }
 
     private void startNewWeek() {

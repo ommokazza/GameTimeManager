@@ -13,4 +13,5 @@
     <string name="add_minutes">%s분 추가</string>
     <string name="prev">이전</string>
     <string name="next">다음</string>
+    <string name="share">공유</string>
 </resources>

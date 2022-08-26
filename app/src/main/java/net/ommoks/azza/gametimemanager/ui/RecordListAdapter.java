@@ -1,5 +1,6 @@
 package net.ommoks.azza.gametimemanager.ui;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Log;
@@ -86,5 +87,23 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
     @Override
     public int getItemCount() {
         return mRecordList.size();
+    }
+
+    public String getRecordListText(Context context) {
+        StringBuilder sb = new StringBuilder();
+        for (Record r : mRecordList) {
+            sb.append(String.format("(%s) ", r.getDateTime()));
+            if (r.type.equals(Common.DB_RECORD_TYPE_RECORD)) {
+                sb.append(r.user).append(" ");
+                sb.append(context.getString(R.string.add_minutes, String.valueOf(r.useTime)));
+            } else if (r.type.equals(Common.DB_RECORD_TYPE_SUMMARY)) {
+                sb.append(getPlayTimeText(context.getResources(), r.useTime));
+            } else if (r.type.equals(Common.DB_RECORD_TYPE_COMMENT)) {
+                sb.append(r.comment);
+            }
+            sb.append("\n");
+        }
+        sb.delete(sb.length() - 1, sb.length());
+        return sb.toString();
     }
 }
