@@ -2,7 +2,6 @@ package net.ommoks.azza.gametimemanager.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 
@@ -22,7 +22,6 @@ import net.ommoks.azza.gametimemanager.database.Record;
 import net.ommoks.azza.gametimemanager.database.User;
 import net.ommoks.azza.gametimemanager.databinding.FragmentMainBinding;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainFragment extends Fragment
@@ -65,27 +64,34 @@ public class MainFragment extends Fragment
     }
 
     private void initialize() {
+        mAdapter = new UserListAdapter(this);
+        mBinding.userList.setAdapter(mAdapter);
+        applyViewModel();
+
         // Asynchronous Initialize
-        mAdapter = new UserListAdapter(new ArrayList<>(), this);
         new Thread(() -> {
-            ArrayList<User> userList = mDataViewModel.getAllUsers();
-            mAdapter.changeDataSet(userList);
-
+            List<User> userList = mDataViewModel.getAllUsers();
             mWeekIndex = mDataViewModel.getLastWeekIndex();
-            Log.d(TAG, "Week Index = " + mWeekIndex);
-
             List<Record> lastWeekRecords = mDataViewModel.getRecordsWithWeekIndex(mWeekIndex);
-            userList.forEach(u -> mAdapter.addPlayTime(u, 0));
-            lastWeekRecords.forEach(r -> {
-                if (r.type.equals(Common.DB_RECORD_TYPE_RECORD)) {
-                    mAdapter.addPlayTime(r.user, r.useTime);
-                }
-            });
 
-            mBinding.userList.setAdapter(mAdapter);
-
-            applyViewModel();
+            mAdapter.initializeDataSet(userList, lastWeekRecords);
         }).start();
+    }
+
+    private void applyViewModel() {
+        mDataViewModel.userAdded.observe(getViewLifecycleOwner(), new Observer<User>() {
+                    @Override
+                    public void onChanged(User user) {
+                        mAdapter.addNewUser(user);
+                    }
+                });
+
+        mDataViewModel.userDeleted.observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                mAdapter.deleteUser(user);
+            }
+        });
     }
 
     public boolean onMenuItemClick(MenuItem item) {
@@ -124,17 +130,10 @@ public class MainFragment extends Fragment
         long timestamp = System.currentTimeMillis();
 
         // Record summary of this week
-        Record summary = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
-        summary.timestamp = ++timestamp;
-        summary.comment = getString(R.string.week_summary);
-        mDataViewModel.insertRecord(summary);
-        for (User user : mDataViewModel.users.getValue()) {
-            Record r = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_SUMMARY);
-            r.timestamp = ++timestamp;
-            r.user = user.name;
-            r.useTime = mAdapter.getTotalPlayTime(user.name);
-            mDataViewModel.insertRecord(r);
-        }
+        Record end = Record.newRecord(mWeekIndex, Common.DB_RECORD_TYPE_COMMENT);
+        end.timestamp = ++timestamp;
+        end.comment = getString(R.string.end_this_week);
+        mDataViewModel.insertRecord(end);
 
         mWeekIndex++;
         mAdapter.clearTotalPlayTime();
@@ -144,17 +143,12 @@ public class MainFragment extends Fragment
         notice.timestamp = ++timestamp;
         notice.comment = getString(R.string.start_a_new_week);
         mDataViewModel.insertRecord(notice);
-
-    }
-
-    private void applyViewModel() {
-        // Nothing to do now
     }
 
     // AddChildDialog.Listener [[
     @Override
     public void onChildAdded(String name) {
-        mDataViewModel.addUser(new User(name));
+        mDataViewModel.addNewUser(name);
     }
     // AddChildDialog.Listener ]]
 

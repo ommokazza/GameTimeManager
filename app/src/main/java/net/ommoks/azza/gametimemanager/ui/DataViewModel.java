@@ -29,11 +29,16 @@ public class DataViewModel extends AndroidViewModel {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private final @NonNull
-    MutableLiveData<ArrayList<User>> _users = new MutableLiveData<>(new ArrayList<>());
+    MutableLiveData<ArrayList<User>> _users = new MutableLiveData<>(null);
     private final @NonNull
-    MutableLiveData<Integer> _weekIndex = new MutableLiveData<>(-1);
+    MutableLiveData<Integer> _weekIndex = new MutableLiveData<>(null);
     private final @NonNull
-    MutableLiveData<List<Record>> _weekRecords = new MutableLiveData<>(new ArrayList<>());
+    MutableLiveData<List<Record>> _weekRecords = new MutableLiveData<>(null);
+    private final @NonNull
+    MutableLiveData<User> _userAdded = new MutableLiveData<>(null);
+    private final @NonNull
+    MutableLiveData<User> _userDeleted = new MutableLiveData<>(null);
+
 
     public final @NonNull
     LiveData<ArrayList<User>> users = _users;
@@ -41,6 +46,10 @@ public class DataViewModel extends AndroidViewModel {
     LiveData<Integer> weekIndex = _weekIndex;
     public final @NonNull
     LiveData<List<Record>> weekRecords = _weekRecords;
+    public final @NonNull
+    LiveData<User> userAdded = _userAdded;
+    public final @NonNull
+    LiveData<User> userDeleted = _userDeleted;
 
     public DataViewModel(@NonNull Application application) {
         super(application);
@@ -87,14 +96,17 @@ public class DataViewModel extends AndroidViewModel {
     }
 
     @WorkerThread
-    public ArrayList<User> getAllUsers() {
-        return new ArrayList<>(userDao.getAll());
+    public List<User> getAllUsers() {
+        List<User> users = userDao.getAll();
+        return users;
     }
 
-    public void addUser(User user) {
+    public void addNewUser(String name) {
         executorService.submit(() -> {
-            userDao.insert(user);
+            User user = new User(name);
+            user.id = userDao.insert(user);
             _users.postValue(new ArrayList<>(userDao.getAll()));
+            _userAdded.postValue(user);
         });
     }
 
@@ -102,6 +114,7 @@ public class DataViewModel extends AndroidViewModel {
         executorService.submit(() -> {
             userDao.delete(user);
             _users.postValue(new ArrayList<>(userDao.getAll()));
+            _userDeleted.postValue(user);
         });
     }
 }

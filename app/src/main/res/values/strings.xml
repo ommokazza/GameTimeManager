@@ -12,7 +12,7 @@
     <string name="toast_msg_when_adding_time">%s : Add %s minutes</string>
     <string name="new_week">New Week</string>
     <string name="start_a_new_week">Start a new week</string>
-    <string name="week_summary">Play-time of this week : </string>
+    <string name="end_this_week">End of this week</string>
     <string name="record_list_title">Play Time Records</string>
     <string name="add_minutes">Add %s minutes</string>
     <string name="prev">PREV</string>
