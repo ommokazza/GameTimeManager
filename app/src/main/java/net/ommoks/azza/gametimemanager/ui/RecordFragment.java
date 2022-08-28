@@ -108,10 +108,7 @@ public class RecordFragment extends Fragment {
     }
 
     private void loadViewData() {
-        new Thread(() -> {
-            mDataViewModel.fetchRecordsWithWeekIndex(mLastWeekIndex);
-            _mWeekIndex.postValue(mLastWeekIndex);
-        }).start();
+        mDataViewModel.fetchRecordsWithWeekIndex(mLastWeekIndex);
         applyViewModel();
     }
 
@@ -149,7 +146,9 @@ public class RecordFragment extends Fragment {
     }
 
     private void onWeekRecordsChanged(List<Record> records) {
-        Objects.requireNonNull(mWeekIndex.getValue());
-        mBinding.recordList.post(() -> mAdapter.changeDataSet(filterRecordList(records)));
+        if (records != null) {
+            Objects.requireNonNull(mWeekIndex.getValue());
+            mBinding.recordList.post(() -> mAdapter.changeDataSet(filterRecordList(records)));
+        }
     }
 }

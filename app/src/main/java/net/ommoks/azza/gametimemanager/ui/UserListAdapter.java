@@ -15,11 +15,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.textview.MaterialTextView;
 
 import net.ommoks.azza.gametimemanager.R;
+import net.ommoks.azza.gametimemanager.common.Common;
+import net.ommoks.azza.gametimemanager.database.Record;
 import net.ommoks.azza.gametimemanager.database.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
@@ -33,7 +37,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     }
 
     private ArrayList<User> mUserList;
-    private final Map<String, Integer> mPlayTimeMap = new HashMap<>();
+    private final Map<User, Integer> mPlayTimeMap = new HashMap<>();
     private final ItemListener mItemListener;
 
     private static final int TIME_UNIT = 15;
@@ -72,28 +76,42 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         }
     }
 
-    public UserListAdapter(ArrayList<User> userList, ItemListener listener) {
-        mUserList = userList;
+    public UserListAdapter(ItemListener listener) {
+        mUserList = new ArrayList<>();
         mItemListener = listener;
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void changeDataSet(ArrayList<User> userList) {
-        mUserList = userList;
+    public void initializeDataSet(List<User> userList, List<Record> recordList) {
+        mUserList = new ArrayList<>(userList);
+        mUserList.forEach(u -> mPlayTimeMap.put(u, 0));
+
+        recordList.stream()
+                .filter(r -> r.type.equals(Common.DB_RECORD_TYPE_RECORD))
+                .sequential()
+                .forEach(r -> {
+                    User user = getUserByName(r.user);
+                    if (user != null) {
+                        int prevPlayTime = Optional.ofNullable(mPlayTimeMap.get(user)).orElse(0);
+                        mPlayTimeMap.put(user, prevPlayTime + r.useTime);
+                    }
+                });
         notifyDataSetChanged();
     }
 
-    public void addPlayTime(String userName, int playTime) {
-        if (isValidName(userName)) {
-            addPlayTime(getUserByName(userName), playTime);
-        } else {
-            Log.e(TAG, "addPlayTime() : Can't find user - " + userName);
-        }
+    public void addNewUser(User user) {
+        mUserList.add(user);
+        mPlayTimeMap.put(user, 0);
+        notifyItemInserted(mUserList.indexOf(user));
     }
 
-    private boolean isValidName(String userName) {
-        return mUserList.stream()
-                .anyMatch(r -> r.name.equals(userName));
+    public void deleteUser(User user) {
+        int position = mUserList.indexOf(user);
+        if (position > -1) {
+            mUserList.remove(position);
+            mPlayTimeMap.remove(user);
+            notifyItemRemoved(position);
+        }
     }
 
     private User getUserByName(String userName) {
@@ -104,12 +122,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     }
 
     public void addPlayTime(User user, int playTime) {
-        if (!mPlayTimeMap.containsKey(user.name)) {
-            mPlayTimeMap.put(user.name, 0);
+        if (mPlayTimeMap.containsKey(user)) {
+            int prevPlayTime = Objects.requireNonNull(mPlayTimeMap.get(user));
+            mPlayTimeMap.put(user, prevPlayTime + playTime);
+            notifyItemChanged(mUserList.indexOf(user));
+        } else {
+            Log.e(TAG, "Error : Invalid User");
         }
-        int prevPlayTime = mPlayTimeMap.get(user.name);
-        mPlayTimeMap.put(user.name, prevPlayTime + playTime);
-        notifyItemChanged(mUserList.indexOf(user));
     }
 
     @NonNull
@@ -135,9 +154,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             }
         });
 
-        if (mPlayTimeMap.containsKey(name)) {
-            vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), mPlayTimeMap.get(name)));
-        }
+        int useTime = Objects.requireNonNull(mPlayTimeMap.get(getUserByName(name)));
+        vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), useTime));
+
         vh.playTime.setOnClickListener(view -> {
             if (mItemListener != null) {
                 mItemListener.onPlayTimeClicked((User) vh.name.getTag());

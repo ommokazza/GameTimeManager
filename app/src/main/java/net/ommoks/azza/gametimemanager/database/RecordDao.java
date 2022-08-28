@@ -18,5 +18,5 @@ public interface RecordDao {
     Record getLastOne();
 
     @Insert
-    void insert(Record record);
+    long insert(Record record);
 }

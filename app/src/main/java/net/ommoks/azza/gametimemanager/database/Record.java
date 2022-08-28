@@ -16,7 +16,7 @@ import java.util.Date;
 @Entity(tableName = "records")
 public class Record {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @ColumnInfo(name = "week_index")
     public int weekIndex;   // Just to identify same week records. Not week number in a year.
