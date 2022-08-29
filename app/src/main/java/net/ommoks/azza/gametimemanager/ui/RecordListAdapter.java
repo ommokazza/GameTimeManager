@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textview.MaterialTextView;
@@ -89,7 +90,12 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
         return mRecordList.size();
     }
 
+    @Nullable
     public String getRecordListText(Context context) {
+        if (mRecordList == null || mRecordList.isEmpty()) {
+            return null;
+        }
+
         StringBuilder sb = new StringBuilder();
         for (Record r : mRecordList) {
             sb.append(String.format("(%s) ", r.getDateTime()));
