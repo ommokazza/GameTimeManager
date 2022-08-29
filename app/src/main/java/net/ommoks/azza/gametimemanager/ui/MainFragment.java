@@ -2,12 +2,14 @@ package net.ommoks.azza.gametimemanager.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
@@ -108,19 +110,26 @@ public class MainFragment extends Fragment
                     .show();
             return true;
         } else if (item.getItemId() == R.id.share) {
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, getSummaryText());
-            sendIntent.setType("text/plain");
+            String summary = getSummaryText();
+            if (summary != null) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, summary);
+                sendIntent.setType("text/plain");
 
-            Intent shareIntent = Intent.createChooser(sendIntent, null);
-            startActivity(shareIntent);
-            return true;
+                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                startActivity(shareIntent);
+                return true;
+            } else {
+                Log.d(TAG, "Nothing to share the summary");
+                return false;
+            }
         } else {
             return false;
         }
     }
 
+    @Nullable
     private String getSummaryText() {
         return mAdapter.getSummaryText(requireActivity());
     }

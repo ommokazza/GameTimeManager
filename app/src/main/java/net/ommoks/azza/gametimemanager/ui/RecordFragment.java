@@ -2,11 +2,13 @@ package net.ommoks.azza.gametimemanager.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -25,6 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RecordFragment extends Fragment {
+
+    private static final String TAG = "GTM/RecordFragment";
 
     private static final String ARG_KEY_NAME = "name";
     private static final String ARG_KEY_WEEK_INDEX = "week_index";
@@ -90,19 +94,26 @@ public class RecordFragment extends Fragment {
 
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.share) {
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, getRecordListText());
-            sendIntent.setType("text/plain");
+            String summary = getRecordListText();
+            if (summary != null) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getRecordListText());
+                sendIntent.setType("text/plain");
 
-            Intent shareIntent = Intent.createChooser(sendIntent, null);
-            startActivity(shareIntent);
-            return true;
+                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                startActivity(shareIntent);
+                return true;
+            } else {
+                Log.d(TAG, "Nothing to share the record");
+                return false;
+            }
         } else {
             return false;
         }
     }
 
+    @Nullable
     private String getRecordListText() {
         return mAdapter.getRecordListText(requireActivity());
     }

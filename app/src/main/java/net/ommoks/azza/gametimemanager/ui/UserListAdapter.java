@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -185,7 +186,12 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    @Nullable
     public String getSummaryText(Context context) {
+        if (mUserList == null || mUserList.isEmpty()) {
+            return null;
+        }
+
         StringBuffer sb = new StringBuffer();
         for (User user : mUserList) {
             sb.append(user.name)
