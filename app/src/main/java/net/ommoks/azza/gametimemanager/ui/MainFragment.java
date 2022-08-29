@@ -74,7 +74,7 @@ public class MainFragment extends Fragment
             mWeekIndex = mDataViewModel.getLastWeekIndex();
             List<Record> lastWeekRecords = mDataViewModel.getRecordsWithWeekIndex(mWeekIndex);
 
-            mAdapter.initializeDataSet(userList, lastWeekRecords);
+            requireActivity().runOnUiThread(() -> mAdapter.initializeDataSet(userList, lastWeekRecords));
         }).start();
     }
 
