@@ -18,12 +18,15 @@
             android:id="@+id/name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:minHeight="@dimen/view_min_size"
+            android:minWidth="@dimen/view_min_size"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
             android:textAppearance="?attr/textAppearanceHeadline5" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/decrease"
+            android:id="@+id/minus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/Widget.Material3.Button.IconButton"
@@ -40,7 +43,7 @@
             android:text="@string/zero" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/increase"
+            android:id="@+id/plus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/Widget.Material3.Button.IconButton"
@@ -65,7 +68,8 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/play_time"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/play_time_view_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/view_min_size"
         style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_gravity="center"
         android:layout_marginStart="0dp"

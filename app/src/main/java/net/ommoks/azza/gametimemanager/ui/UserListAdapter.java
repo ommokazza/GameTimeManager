@@ -46,7 +46,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         final private MaterialTextView name;
+        private final AppCompatButton minus;
         private final AppCompatTextView time;
+        private final AppCompatButton plus;
         private final AppCompatButton done;
         private final AppCompatButton playTime;
 
@@ -61,10 +63,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
                 return true;
             });
             time = view.findViewById(R.id.minutes);
-            AppCompatButton decrease = view.findViewById(R.id.decrease);
-            decrease.setOnClickListener(view1 -> calculateTime(-TIME_UNIT));
-            AppCompatButton increase = view.findViewById(R.id.increase);
-            increase.setOnClickListener(view1 -> calculateTime(TIME_UNIT));
+            minus = view.findViewById(R.id.minus);
+            minus.setOnClickListener(view1 -> calculateTime(-TIME_UNIT));
+            plus = view.findViewById(R.id.plus);
+            plus.setOnClickListener(view1 -> calculateTime(TIME_UNIT));
             done = view.findViewById(R.id.done);
             playTime = view.findViewById(R.id.play_time);
         }
@@ -142,9 +144,15 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder vh, int position) {
+        Context context = vh.itemView.getContext();
+
         String name = mUserList.get(position).name;
         vh.name.setText(name);
+        vh.name.setContentDescription(name);
         vh.name.setTag(mUserList.get(position));
+
+        vh.minus.setContentDescription(vh.name + " " + context.getString(R.string.minus));
+        vh.plus.setContentDescription(vh.name + " " + context.getString(R.string.plus));
 
         vh.done.setOnClickListener(doneBtn -> {
             int minutes = Integer.parseInt(vh.time.getText().toString());
@@ -154,10 +162,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
                 mItemListener.onPlayTimeSubmitted(mUserList.get(position), minutes);
             }
         });
-
         int useTime = Objects.requireNonNull(mPlayTimeMap.get(getUserByName(name)));
-        vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), useTime));
+        vh.done.setContentDescription(vh.name + " " + context.getString(R.string.add_minutes, String.valueOf(useTime)));
 
+        vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), useTime));
         vh.playTime.setOnClickListener(view -> {
             if (mItemListener != null) {
                 mItemListener.onPlayTimeClicked((User) vh.name.getTag());
