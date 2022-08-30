@@ -18,6 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:minHeight="?attr/actionBarSize"
             app:navigationIcon="@drawable/chevron_left_48px"
+            app:navigationContentDescription="@string/back"
             app:menu="@menu/record_fragment_menu"
             style="@style/Widget.MaterialComponents.Toolbar.Primary" />
 
@@ -33,6 +34,7 @@
             android:id="@+id/prev"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:minHeight="@dimen/view_min_size"
             android:layout_weight="1"
             android:layout_marginHorizontal="12dp"
             android:text="@string/prev"
