@@ -200,7 +200,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             return null;
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (User user : mUserList) {
             sb.append(user.name)
                     .append(" : ")

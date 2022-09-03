@@ -45,10 +45,6 @@ public class MainFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            // Handle arguments. Currently nothing to do.
-        }
-
         mDataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
     }
 
@@ -81,19 +77,11 @@ public class MainFragment extends Fragment
     }
 
     private void applyViewModel() {
-        mDataViewModel.userAdded.observe(getViewLifecycleOwner(), new Observer<User>() {
-                    @Override
-                    public void onChanged(User user) {
-                        mAdapter.addNewUser(user);
-                    }
-                });
+        mDataViewModel.userAdded.observe(getViewLifecycleOwner(),
+                user -> mAdapter.addNewUser(user));
 
-        mDataViewModel.userDeleted.observe(getViewLifecycleOwner(), new Observer<User>() {
-            @Override
-            public void onChanged(User user) {
-                mAdapter.deleteUser(user);
-            }
-        });
+        mDataViewModel.userDeleted.observe(getViewLifecycleOwner(),
+                user -> mAdapter.deleteUser(user));
     }
 
     public boolean onMenuItemClick(MenuItem item) {

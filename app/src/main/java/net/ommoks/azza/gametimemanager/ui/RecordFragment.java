@@ -35,7 +35,7 @@ public class RecordFragment extends Fragment {
 
     private DataViewModel mDataViewModel;
     FragmentRecordBinding mBinding;
-    private RecordListAdapter mAdapter = new RecordListAdapter(Collections.emptyList());
+    final private RecordListAdapter mAdapter = new RecordListAdapter(Collections.emptyList());
 
     private String mName;
     private int mLastWeekIndex;

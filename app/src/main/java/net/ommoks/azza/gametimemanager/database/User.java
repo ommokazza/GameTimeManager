@@ -13,7 +13,7 @@ public class User {
     public long id;
 
     @ColumnInfo(name = "user")
-    public String name;
+    final public String name;
 
     public User(String name) {
         this.name = name;
@@ -22,8 +22,7 @@ public class User {
     @Ignore
     @Override
     public boolean equals(@Nullable Object other) {
-        return other != null &&
-                other instanceof User &&
+        return other instanceof User &&
                 this.id == ((User)other).id
                 && this.name.equals(((User)other).name);
     }
