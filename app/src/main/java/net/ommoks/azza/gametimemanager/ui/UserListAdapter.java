@@ -146,10 +146,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder vh, int position) {
         Context context = vh.itemView.getContext();
 
-        String name = mUserList.get(position).name;
-        vh.name.setText(name);
-        vh.name.setContentDescription(name);
-        vh.name.setTag(mUserList.get(position));
+        User user = mUserList.get(position);
+        vh.name.setText(user.name);
+        vh.name.setContentDescription(user.name);
+        vh.name.setTag(user);
 
         vh.minus.setContentDescription(vh.name + " " + context.getString(R.string.minus));
         vh.plus.setContentDescription(vh.name + " " + context.getString(R.string.plus));
@@ -162,7 +162,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
                 mItemListener.onPlayTimeSubmitted(mUserList.get(position), minutes);
             }
         });
-        int useTime = Objects.requireNonNull(mPlayTimeMap.get(getUserByName(name)));
+        int useTime = Objects.requireNonNull(mPlayTimeMap.get(user));
         vh.done.setContentDescription(vh.name + " " + context.getString(R.string.add_minutes, String.valueOf(useTime)));
 
         vh.playTime.setText(getPlayTimeText(vh.playTime.getContext(), useTime));
@@ -184,8 +184,8 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         return mUserList.size();
     }
 
-    public int getTotalPlayTime(String name) {
-        return Optional.ofNullable(mPlayTimeMap.get(name)).orElse(0);
+    public int getTotalPlayTime(User user) {
+        return Optional.ofNullable(mPlayTimeMap.get(user)).orElse(0);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -204,7 +204,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         for (User user : mUserList) {
             sb.append(user.name)
                     .append(" : ")
-                    .append(getPlayTimeText(context, getTotalPlayTime(user.name)))
+                    .append(getPlayTimeText(context, getTotalPlayTime(user)))
                     .append("\n");
         }
         sb.delete(sb.length() - 1, sb.length());
