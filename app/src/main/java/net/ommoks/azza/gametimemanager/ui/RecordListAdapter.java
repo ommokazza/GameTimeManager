@@ -28,9 +28,9 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private MaterialTextView timestamp;
-        private MaterialTextView name;
-        private MaterialTextView log;
+        final private MaterialTextView timestamp;
+        final private MaterialTextView name;
+        final private MaterialTextView log;
 
         public ViewHolder(View view) {
             super(view);

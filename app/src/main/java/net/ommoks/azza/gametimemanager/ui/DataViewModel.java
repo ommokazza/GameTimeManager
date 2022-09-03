@@ -16,7 +16,6 @@ import net.ommoks.azza.gametimemanager.database.User;
 import net.ommoks.azza.gametimemanager.database.UserDao;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -97,8 +96,7 @@ public class DataViewModel extends AndroidViewModel {
 
     @WorkerThread
     public List<User> getAllUsers() {
-        List<User> users = userDao.getAll();
-        return users;
+        return userDao.getAll();
     }
 
     public void addNewUser(String name) {
