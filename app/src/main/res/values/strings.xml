@@ -21,5 +21,6 @@
     <string name="minus">minus</string>
     <string name="plus">plus</string>
     <string name="back">back</string>
+    <string name="can_not_add_user_duplicated_name">Can\'t add the user. Duplicated name</string>
 </resources>
 
