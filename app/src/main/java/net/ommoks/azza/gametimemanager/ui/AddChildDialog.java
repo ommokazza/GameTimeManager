@@ -2,6 +2,7 @@ package net.ommoks.azza.gametimemanager.ui;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -37,10 +38,10 @@ public class AddChildDialog extends DialogFragment {
         mTextInputEditText = (TextInputEditText) mTextInputLayout.getEditText();
         builder.setView(view)
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                    if (mListener != null) {
-                        mListener.onChildAdded(Objects.requireNonNull(mTextInputEditText.getText()).toString());
+                    String name = Objects.requireNonNull(mTextInputEditText.getText()).toString();
+                    if (mListener != null && !TextUtils.isEmpty(name)) {
+                        mListener.onChildAdded(name);
                     }
-                    dialogInterface.dismiss();
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
 
