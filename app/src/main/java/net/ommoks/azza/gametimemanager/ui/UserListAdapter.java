@@ -210,4 +210,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         sb.delete(sb.length() - 1, sb.length());
         return sb.toString();
     }
+
+    public boolean checkDuplicated(String name) {
+        return mUserList.stream()
+                .map(u -> u.name)
+                .anyMatch(n -> n.equals(name));
+    }
 }

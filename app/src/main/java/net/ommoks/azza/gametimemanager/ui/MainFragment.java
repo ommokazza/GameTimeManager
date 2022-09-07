@@ -145,7 +145,11 @@ public class MainFragment extends Fragment
     // AddChildDialog.Listener [[
     @Override
     public void onChildAdded(String name) {
-        mDataViewModel.addNewUser(name);
+        if (!mAdapter.checkDuplicated(name)) {
+            mDataViewModel.addNewUser(name);
+        } else {
+            Toast.makeText(requireActivity(), R.string.can_not_add_user_duplicated_name, Toast.LENGTH_SHORT).show();
+        }
     }
     // AddChildDialog.Listener ]]
 
