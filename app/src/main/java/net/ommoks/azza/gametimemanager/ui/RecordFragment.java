@@ -134,7 +134,9 @@ public class RecordFragment extends Fragment {
 
     private void updateNavigationButtons(int weekIndex) {
         mBinding.prev.setEnabled(weekIndex > 0);
+        mBinding.prev.setClickable(weekIndex > 0);
         mBinding.next.setEnabled(weekIndex < mLastWeekIndex);
+        mBinding.next.setClickable(weekIndex < mLastWeekIndex);
     }
 
     private void onPrevNextClickListener(View v) {
